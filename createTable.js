@@ -21,6 +21,8 @@ export function createTable(data) {
 		for (let key in obj) {
 			const cell = row.insertCell();
 			if (/^http.*\.jpg$/.test(obj[key]) || /^http.*\.png$/.test(obj[key])) {
+				
+				// Mind the availability of setHTML() if not using Chrome...
 				cell.setHTML(`<img src=${obj[key]} class="rounded-circle" style="max-width: 3.5rem" alt="pic" />`);
 			} else {
 				cell.innerText = obj[key];

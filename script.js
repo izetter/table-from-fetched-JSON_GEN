@@ -1,80 +1,44 @@
 import { createTable } from './createTable.js';
 
-const fetchBtn = document.getElementById('fetch-btn');
+const fetchUsersBtn = document.getElementById('fetch-btn');
+const deletetableBtn = document.getElementById('delete-table-btn');
 const tableContainer = document.getElementById('table-container');
-const usersEndpoint = 'https://reqres.in/api/users' // https://reqres.in/api/users?delay=3
-let users = [];
+const usersEndpoint = 'https://reqres.in/api/users?delay=3';
 
-async function getUsers(url) {
+// To avoid using innerHTML
+function deleteTable() {
+	tableContainer.innerText = null;
+}
+
+function isDataLocallyAvailable(key) {
+	return sessionStorage.getItem(key) === null ? false : true;
+}
+
+function setSessionCleanup(key) {
+	setTimeout(() => {
+		sessionStorage.removeItem(key);
+	}, 10000);
+}
+
+async function getData(url) {
 	const response = await fetch(url);
-	const data = await response.json();
-	users = data.data;
-	console.log(users)
+	const parsedResponse = await response.json();
+	return parsedResponse.data;
 }
 
-async function generateTable(url) {
-	await getUsers(url);
-	tableContainer.append(createTable(users));
+async function handleTableGeneration(url, key) {
+	if (isDataLocallyAvailable(key)) {
+		const localData = JSON.parse(sessionStorage.getItem(key));
+		tableContainer.innerText = null;
+		tableContainer.append(createTable(localData));
+	} else {
+		const data = await getData(url);
+		tableContainer.innerText = null;
+		tableContainer.append(createTable(data));
+		sessionStorage.setItem(key, JSON.stringify(data));
+		setSessionCleanup(key);
+	}
 }
 
-
-
-
-
-fetchBtn.addEventListener('click', () => generateTable(usersEndpoint));
-
-/* const usuarios = {
-	page: 1,
-	per_page: 6,
-	total: 12,
-	total_pages: 2,
-	data: [
-		{
-			id: 1,
-			email: 'george.bluth@reqres.in',
-			first_name: 'George',
-			last_name: 'Bluth',
-			avatar: 'https://reqres.in/img/faces/1-image.jpg',
-		},
-		{
-			id: 2,
-			email: 'janet.weaver@reqres.in',
-			first_name: 'Janet',
-			last_name: 'Weaver',
-			avatar: 'https://reqres.in/img/faces/2-image.jpg',
-		},
-		{
-			id: 3,
-			email: 'emma.wong@reqres.in',
-			first_name: 'Emma',
-			last_name: 'Wong',
-			avatar: 'https://reqres.in/img/faces/3-image.jpg',
-		},
-		{
-			id: 4,
-			email: 'eve.holt@reqres.in',
-			first_name: 'Eve',
-			last_name: 'Holt',
-			avatar: 'https://reqres.in/img/faces/4-image.jpg',
-		},
-		{
-			id: 5,
-			email: 'charles.morris@reqres.in',
-			first_name: 'Charles',
-			last_name: 'Morris',
-			avatar: 'https://reqres.in/img/faces/5-image.jpg',
-		},
-		{
-			id: 6,
-			email: 'tracey.ramos@reqres.in',
-			first_name: 'Tracey',
-			last_name: 'Ramos',
-			avatar: 'https://reqres.in/img/faces/6-image.jpg',
-		},
-	],
-	support: {
-		url: 'https://reqres.in/#support-heading',
-		text: 'To keep ReqRes free, contributions towards server costs are appreciated!',
-	},
-};
- */
+fetchUsersBtn.addEventListener('click', () => handleTableGeneration(usersEndpoint, 'users'));
+deletetableBtn.addEventListener('click', deleteTable);
