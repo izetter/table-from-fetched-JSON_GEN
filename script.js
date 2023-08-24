@@ -1,6 +1,29 @@
 import { createTable } from './createTable.js';
 
-const users = {
+const fetchBtn = document.getElementById('fetch-btn');
+const tableContainer = document.getElementById('table-container');
+const usersEndpoint = 'https://reqres.in/api/users' // https://reqres.in/api/users?delay=3
+let users = [];
+
+async function getUsers(url) {
+	const response = await fetch(url);
+	const data = await response.json();
+	users = data.data;
+	console.log(users)
+}
+
+async function generateTable(url) {
+	await getUsers(url);
+	tableContainer.append(createTable(users));
+}
+
+
+
+
+
+fetchBtn.addEventListener('click', () => generateTable(usersEndpoint));
+
+/* const usuarios = {
 	page: 1,
 	per_page: 6,
 	total: 12,
@@ -54,7 +77,4 @@ const users = {
 		text: 'To keep ReqRes free, contributions towards server costs are appreciated!',
 	},
 };
-
-const container = document.getElementById('table-container');
-
-container.append(createTable(users.data));
+ */
